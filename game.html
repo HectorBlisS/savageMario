@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <img src="" alt="">
+    <button id="b" onclick="start()" >Iniciar</button>
+
+    <script>
+        //canvas init
+    
+
+
+
+    //ctx.fillRect(0,0,50,50)
+
+    //colecciones de cosas (instancias)
+
+    var badStuff = []
+
+    class Ball{
+        constructor(x=0,y=25){
+            this.x = x
+            this.y = y
+            this.width=20
+            this.height=20
+            this.image = new Image()
+            this.image.src = "ball.ico"
+        }
+        draw(){
+            this.x+=10
+            ctx.drawImage(this.image,this.x,this.y,this.width,this.height)
+        }
+    }
+
+    class Character{
+        constructor(){
+            this.balls = []
+            this.x = 0
+            this.y = 0
+            this.width = 50
+            this.height=60
+            this.image3 = new Image()
+            this.image3.src = "mario3.png"
+            this.image2 = new Image()
+            this.image2.src = "mario2.png"
+            this.image1 = new Image()
+            this.image1.src = "mario1.png"
+           // this.image1.onload = this.draw
+            this.theImage = this.image1
+            this.howManyTimesMarioHasBeenTouched = 0
+        }
+
+        animate(){
+            if(frames % 10 === 0){
+                if(this.theImage === this.image1) this.theImage = this.image2
+                else if(this.theImage === this.image2) this.theImage = this.image3
+                else if(this.theImage === this.image3) this.theImage = this.image1
+            }
+        }
+
+        changePosition(){}
+
+        draw(){
+            this.changePosition()
+            this.animate()
+            ctx.drawImage(this.theImage,this.x,this.y,this.width,this.height)
+        }
+    } // char
+
+    class Goompa extends Character{
+        constructor(){
+            super()
+            this.x = 100
+            this.y = 30
+            this.width = 20
+            this.height = 25
+            this.image1.src = "goompa1.png"
+            this.image2.src = "goompa2.png"
+            this.image3.src = "goompa3.png"
+            this.direction = true
+        }
+
+        changePosition(){
+            if(this.direction) this.x--
+            else this.x++
+        }
+
+        checkCollition(mario){
+            return  (this.x < mario.x + mario.width) &&
+                    (this.x + this.width > mario.x) &&
+                    (this.y < mario.y + mario.height) &&
+                    (this.y + this.height > mario.y);
+        }
+        
+    }
+
+    //instancia
+    var mario = new Character()
+    var frames = 0
+    function update(){
+        frames++
+        ctx.clearRect(0,0,canvas.width,canvas.height)
+        mario.draw()
+        generateGoompa()
+        drawGoompas()
+        checkGoompasCollitions()
+        //balls
+        drawBalls()
+        ballsAndBadStuff()
+    }
+
+    var canvas
+    var ctx
+    function start(){
+        canvas = document.createElement('canvas')
+        document.body.appendChild(canvas)
+        ctx = canvas.getContext('2d')
+        setInterval(update,1000/60)
+        document.getElementById('b').remove()
+    }
+
+
+    //aux func
+
+    function ballsAndBadStuff(){
+        mario.balls.forEach(function(ball, bI){
+            badStuff.forEach(function(goompa, gI){
+                if(goompa.checkCollition(ball)){
+                    mario.balls.splice(bI,1)
+                    badStuff.splice(gI,1)
+                }
+            })
+        })
+    }
+
+    function drawBalls(){
+        mario.balls.forEach(function(ball){
+            ball.draw()
+        })
+    }
+
+    function checkGoompasCollitions(){
+        badStuff.forEach(function(goompa){
+            if(goompa.checkCollition(mario)){
+                console.log("me siento sucio")
+                goompa.direction = false
+            
+                // var index = badStuff.indexOf(goompa)
+                // badStuff.splice(index,1)
+            }
+        })
+    }
+
+    function drawGoompas(){
+        badStuff.forEach(function(goompa){
+            goompa.draw()
+        })
+    }
+
+    function generateGoompa(){
+        if(frames % 50 === 0){
+            badStuff.push(new Goompa())
+        }
+        
+    }
+
+    addEventListener('keydown', function(e){
+        if(e.keyCode === 32){
+            mario.balls.push(new Ball(mario.x))
+        }
+    })
+    
+    </script>
+</body>
+</html>
